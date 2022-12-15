@@ -47,7 +47,7 @@ def main():
     while cap.isOpened():
         ret, frame = cap.read()
 
-        frame=detector.findHands(frame)
+        detector.findHands(frame, draw=False)
         lmList = detector.findPosition(frame)
 
         if len(lmList) !=0:
