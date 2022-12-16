@@ -35,40 +35,29 @@ while cap.isOpened():
     detector.findHands(frame, draw=True)
     points=detector.findPosition(frame)
     if len(points) >0:
-        # print(points[0])
         x1, y1 = points[4][1], points[4][2]
         x2, y2 = points[8][1], points[8][2]
         cx, cy = (x1+x2)//2, (y1+y2)//2
         color = (255, 0, 255)
-        cv.circle(frame, (x1, y1), 10, color, cv.FILLED)
-        cv.circle(frame, (x2, y2), 10, color, cv.FILLED)
-        cv.circle(frame, (cx, cy), 10, color, cv.FILLED)
-        cv.line(frame, (x1, y1), (x2, y2), color, 3)
 
         pixel = pixelInCm(points[0][1], points[0][2], points[5][1], points[5][2])
-
-        length = math.hypot(x2-x1, y2-y1)//pixel
-
-        # print(length)
-        # if length<50:
-        #     cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
-
-        # hand range 50 - 300
-        # volume range 65 - 0
+        length = math.hypot(x2 - x1, y2 - y1) // pixel
 
         vol = np.interp(length, [0, 14], [-7, 100])
+        if points[12][1] > points[9][1]:
+            cv.circle(frame, (x1, y1), 10, color, cv.FILLED)
+            cv.circle(frame, (x2, y2), 10, color, cv.FILLED)
+            cv.circle(frame, (cx, cy), 10, color, cv.FILLED)
+            cv.line(frame, (x1, y1), (x2, y2), color, 3)
 
-        if vol<0:
-            volume.setvolume(0)
+            if vol<0:
+                volume.setvolume(0)
 
-        if vol >=0 and vol <101:
-            volume.setvolume(int(vol))
+            if vol >=0 and vol <101:
+                volume.setvolume(int(vol))
 
-        # print(vol)
-        # if length < 50:
-        #     cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
 
-        cv.putText(frame, "destance: " + str(length)+' cm', (300, 50), cv.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 3)
+        cv.putText(frame, "destance: " + str(length)+' cm', (300, 50), cv.FONT_HERSHEY_PLAIN, 2, (255, 255, 0), 3)
 
     cTime = time.time()
     fps = 1 / (cTime - pTime)
