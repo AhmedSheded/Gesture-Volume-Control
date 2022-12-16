@@ -3,10 +3,10 @@ import time
 import numpy as np
 import HandTrackingModule as hm
 import math
-from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+import alsaaudio
 
+
+volume = alsaaudio.Mixer()
 
 wCam, hCam = 640, 480
 pTime = 0
@@ -21,18 +21,12 @@ detector = hm.HandDetector(detectionConf=0.7)
 
 
 
-
-
-devices = AudioUtilities.GetSpeakers()
-interface = devices.Activate(
-    IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-volume = cast(interface, POINTER(IAudioEndpointVolume))
-# volume.GetMute()
-# volume.GetMasterVolumeLevel()
-print(volume.GetVolumeRange())
-# volume.SetMasterVolumeLevel(-20.0, None)
-
-
+def pixelInCm(x1, y1, x2, y2):
+    dx = x1-x2
+    dy = y1-y2
+    pixels = np.sqrt(dx*dx+dy*dy)
+    pixel = pixels/10
+    return pixel
 
 
 while cap.isOpened():
@@ -51,12 +45,30 @@ while cap.isOpened():
         cv.circle(frame, (cx, cy), 10, color, cv.FILLED)
         cv.line(frame, (x1, y1), (x2, y2), color, 3)
 
-        length = math.hypot(x2-x1, y2-y1)
-        print(length)
-        if length<50:
-            cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
+        pixel = pixelInCm(points[0][1], points[0][2], points[5][1], points[5][2])
 
+        length = math.hypot(x2-x1, y2-y1)//pixel
 
+        # print(length)
+        # if length<50:
+        #     cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
+
+        # hand range 50 - 300
+        # volume range 65 - 0
+
+        vol = np.interp(length, [0, 14], [-7, 100])
+
+        if vol<0:
+            volume.setvolume(0)
+
+        if vol >=0 and vol <101:
+            volume.setvolume(int(vol))
+
+        # print(vol)
+        # if length < 50:
+        #     cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
+
+        cv.putText(frame, "destance: " + str(length)+' cm', (300, 50), cv.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 3)
 
     cTime = time.time()
     fps = 1 / (cTime - pTime)
