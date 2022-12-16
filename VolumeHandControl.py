@@ -11,7 +11,6 @@ volume = alsaaudio.Mixer()
 wCam, hCam = 640, 480
 pTime = 0
 cTime = 0
-
 cap = cv.VideoCapture(0)
 
 cap.set(3, wCam)
@@ -44,26 +43,41 @@ while cap.isOpened():
         length = math.hypot(x2 - x1, y2 - y1) // pixel
 
         vol = np.interp(length, [0, 14], [-7, 100])
-        if points[12][1] > points[9][1]:
+        volBar = np.interp(length, [0, 14], [400, 150])
+        volPer = np.interp(length, [0, 14], [-7, 100])
+        volcolorup = np.interp(length, [0, 14], [0, 255])
+        volcolordown = np.interp(length, [0, 14], [255, 0])
+
+        if points[12][2] > points[9][2]:
             cv.circle(frame, (x1, y1), 10, color, cv.FILLED)
             cv.circle(frame, (x2, y2), 10, color, cv.FILLED)
-            cv.circle(frame, (cx, cy), 10, color, cv.FILLED)
             cv.line(frame, (x1, y1), (x2, y2), color, 3)
+            cv.circle(frame, (cx, cy), 10, (volcolorup, 150, volcolordown), cv.FILLED)
+
+            if length<5:
+                cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
 
             if vol<0:
-                volume.setvolume(0)
+                vol=0
+
+            if volPer<0:
+                volPer=0
 
             if vol >=0 and vol <101:
                 volume.setvolume(int(vol))
 
+            cv.rectangle(frame, (50, 150), (85, 400), (0, 255, 255), 3)
+            cv.rectangle(frame, (50, int(volBar)), (85, 400), (volcolorup, 150, volcolordown), cv.FILLED)
+            cv.putText(frame, str(int(volPer))+"%", (40, 450), cv.FONT_HERSHEY_COMPLEX, 1, (0, 150, 255), 2)
 
-        cv.putText(frame, "destance: " + str(length)+' cm', (300, 50), cv.FONT_HERSHEY_PLAIN, 2, (255, 255, 0), 3)
+        cv.putText(frame, "destance: " + str(length)+' cm', (300, 50), cv.FONT_HERSHEY_COMPLEX, 1, (255, 255, 0), 2)
+
 
     cTime = time.time()
     fps = 1 / (cTime - pTime)
     pTime = cTime
 
-    cv.putText(frame, "FPS: " + str(int(fps)), (10, 50), cv.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 3)
+    cv.putText(frame, "FPS: " + str(int(fps)), (10, 50), cv.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
     cv.imshow('frame', frame)
     if cv.waitKey(1) == 27:
