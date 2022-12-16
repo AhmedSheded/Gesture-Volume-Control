@@ -48,11 +48,15 @@ while cap.isOpened():
         volcolorup = np.interp(length, [0, 14], [0, 255])
         volcolordown = np.interp(length, [0, 14], [255, 0])
 
+
         if points[12][2] > points[9][2]:
             cv.circle(frame, (x1, y1), 10, color, cv.FILLED)
             cv.circle(frame, (x2, y2), 10, color, cv.FILLED)
             cv.line(frame, (x1, y1), (x2, y2), color, 3)
             cv.circle(frame, (cx, cy), 10, (volcolorup, 150, volcolordown), cv.FILLED)
+
+            cv.putText(frame, "Control: ", (10, 50), cv.FONT_HERSHEY_COMPLEX, 1, (0, 255, 255), 2)
+            cv.putText(frame, "ON", (160, 50), cv.FONT_HERSHEY_COMPLEX, 1, (200, 255, 50), 2)
 
             if length<5:
                 cv.circle(frame, (cx, cy), 10, (0, 255, 0), cv.FILLED)
@@ -69,7 +73,9 @@ while cap.isOpened():
             cv.rectangle(frame, (50, 150), (85, 400), (0, 255, 255), 3)
             cv.rectangle(frame, (50, int(volBar)), (85, 400), (volcolorup, 150, volcolordown), cv.FILLED)
             cv.putText(frame, str(int(volPer))+"%", (40, 450), cv.FONT_HERSHEY_COMPLEX, 1, (0, 150, 255), 2)
-
+        else:
+            cv.putText(frame, "Control: ", (10, 50), cv.FONT_HERSHEY_COMPLEX, 1, (0, 255, 255), 2)
+            cv.putText(frame, "OFF", (160, 50), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
         cv.putText(frame, "destance: " + str(length)+' cm', (300, 50), cv.FONT_HERSHEY_COMPLEX, 1, (255, 255, 0), 2)
 
 
@@ -77,7 +83,7 @@ while cap.isOpened():
     fps = 1 / (cTime - pTime)
     pTime = cTime
 
-    cv.putText(frame, "FPS: " + str(int(fps)), (10, 50), cv.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
+    cv.putText(frame, "FPS: " + str(int(fps)), (500, 450), cv.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
     cv.imshow('frame', frame)
     if cv.waitKey(1) == 27:
